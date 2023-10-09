@@ -39,5 +39,4 @@
       synchronize:
         src: /tmp/boxfuse/target/
         dest: /var/lib/tomcat9/webapps/
-        rsync_path: /usr/bin/rsync
       delegate_to: 185.130.113.150
