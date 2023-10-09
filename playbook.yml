@@ -1,0 +1,43 @@
+---
+- name: Build application
+  hosts: build
+  become: true
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - git
+          - maven
+        state: present
+
+    - name: Clone application
+      git:
+        repo: https://github.com/phaeton87/boxfuse-sample-java-war-hello
+        dest: /tmp/boxfuse
+        version: HEAD
+
+    - name: Build application with Maven
+      command:
+        cmd: mvn package -f /tmp/boxfuse
+        chdir: /tmp/boxfuse
+
+- name: Deploy application
+  hosts: prod
+  become: true
+  tasks:
+    - name: Install tomcat
+      apt:
+        name:
+          - tomcat9
+
+    - name: Start Tomcat
+      service:
+        name: tomcat9
+        state: restarted
+
+    - name: Copy application to prod server
+      synchronize:
+        src: /tmp/boxfuse/target/
+        dest: /var/lib/tomcat9/webapps/
+        rsync_path: /usr/bin/rsync
+      delegate_to: 185.130.113.150
